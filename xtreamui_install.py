@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import subprocess, os, random, string, sys, shutil, socket, zipfile, urllib.request, json
+import subprocess, os, random, string, sys, shutil, socket, zipfile, urllib.request, json, base64
 from itertools import cycle, zip_longest as izip
 from zipfile import ZipFile
 from urllib.request import Request, urlopen, URLError, HTTPError
@@ -9,7 +9,8 @@ rDownloadURL = {"main": "https://bitbucket.org/le_lio/assets/raw/master/main_xui
 rPackages = ["libcurl4", "libxslt1-dev", "libgeoip-dev", "e2fsprogs", "wget", "mcrypt", "nscd", "htop", "zip", "unzip", "mc", "libpng16-16", "libzip5", "python-is-python2", "mariadb-server"]
 rInstall = {"MAIN": "main", "LB": "sub"}
 rUpdate = {"ADMIN": "admin"}
-rMySQLCnf = b"IyBYdHJlYW0gQ29kZXMKCltjbGllbnRdCnBvcnQgICAgICAgICAgICA9IDMzMDYKCltteXNxbGRfc2FmZV0KbmljZSAgICAgICAgICAgID0gMAoKW215c3FsZF0KdXNlciAgICAgICAgICAgID0gbXlzcWwKcG9ydCAgICAgICAgICAgID0gNzk5OQpiYXNlZGlyICAgICAgICAgPSAvdXNyCmRhdGFkaXIgICAgICAgICA9IC92YXIvbGliL215c3FsCnRtcGRpciAgICAgICAgICA9IC90bXAKbGMtbWVzc2FnZXMtZGlyID0gL3Vzci9zaGFyZS9teXNxbApza2lwLWV4dGVybmFsLWxvY2tpbmcKc2tpcC1uYW1lLXJlc29sdmU9MQoKYmluZC1hZGRyZXNzICAgICAgICAgICAgPSAqCmtleV9idWZmZXJfc2l6ZSA9IDEyOE0KCm15aXNhbV9zb3J0X2J1ZmZlcl9zaXplID0gNE0KbWF4X2FsbG93ZWRfcGFja2V0ICAgICAgPSA2NE0KbXlpc2FtLXJlY292ZXItb3B0aW9ucyA9IEJBQ0tVUAptYXhfbGVuZ3RoX2Zvcl9zb3J0X2RhdGEgPSA4MTkyCnF1ZXJ5X2NhY2hlX2xpbWl0ICAgICAgID0gNE0KcXVlcnlfY2FjaGVfc2l6ZSAgICAgICAgPSAwCnF1ZXJ5X2NhY2hlX3R5cGUJPSAwCgpleHBpcmVfbG9nc19kYXlzICAgICAgICA9IDEwCm1heF9iaW5sb2dfc2l6ZSAgICAgICAgID0gMTAwTQoKbWF4X2Nvbm5lY3Rpb25zICA9IDIwMDAgI3JlY29tbWVuZGVkIGZvciAxNkdCIHJhbSAKYmFja19sb2cgPSA0MDk2Cm9wZW5fZmlsZXNfbGltaXQgPSAxNjM4NAppbm5vZGJfb3Blbl9maWxlcyA9IDE2Mzg0Cm1heF9jb25uZWN0X2Vycm9ycyA9IDMwNzIKdGFibGVfb3Blbl9jYWNoZSA9IDQwOTYKdGFibGVfZGVmaW5pdGlvbl9jYWNoZSA9IDQwOTYKCgp0bXBfdGFibGVfc2l6ZSA9IDFHCm1heF9oZWFwX3RhYmxlX3NpemUgPSAxRwoKaW5ub2RiX2J1ZmZlcl9wb29sX3NpemUgPSAxMkcgI3JlY29tbWVuZGVkIGZvciAxNkdCIHJhbQppbm5vZGJfYnVmZmVyX3Bvb2xfaW5zdGFuY2VzID0gMQppbm5vZGJfcmVhZF9pb190aHJlYWRzID0gNjQKaW5ub2RiX3dyaXRlX2lvX3RocmVhZHMgPSA2NAppbm5vZGJfdGhyZWFkX2NvbmN1cnJlbmN5ID0gMAppbm5vZGJfZmx1c2hfbG9nX2F0X3RyeF9jb21taXQgPSAwCmlubm9kYl9mbHVzaF9tZXRob2QgPSBPX0RJUkVDVApwZXJmb3JtYW5jZV9zY2hlbWEgPSBPTgppbm5vZGItZmlsZS1wZXItdGFibGUgPSAxCmlubm9kYl9pb19jYXBhY2l0eT0yMDAwMAppbm5vZGJfdGFibGVfbG9ja3MgPSAwCmlubm9kYl9sb2NrX3dhaXRfdGltZW91dCA9IDAKaW5ub2RiX2RlYWRsb2NrX2RldGVjdCA9IDAKaW5ub2RiX2xvZ19maWxlX3NpemUgPSA1MTJNCgpzcWwtbW9kZT0iTk9fRU5HSU5FX1NVQlNUSVRVVElPTiIKCltteXNxbGR1bXBdCnF1aWNrCnF1b3RlLW5hbWVzCm1heF9hbGxvd2VkX3BhY2tldCAgICAgID0gMTZNCgpbbXlzcWxdCgpbaXNhbWNoa10Ka2V5X2J1ZmZlcl9zaXplICAgICAgICAgICAgICA9IDE2TQo=".decode("base64")
+rMySQLCnf = base64.b64decode(b"IyBYdHJlYW0gQ29kZXMKCltjbGllbnRdCnBvcnQgICAgICAgICAgICA9IDMzMDYKCltteXNxbGRfc2FmZV0KbmljZSAgICAgICAgICAgID0gMAoKW215c3FsZF0KdXNlciAgICAgICAgICAgID0gbXlzcWwKcG9ydCAgICAgICAgICAgID0gNzk5OQpiYXNlZGlyICAgICAgICAgPSAvdXNyCmRhdGFkaXIgICAgICAgICA9IC92YXIvbGliL215c3FsCnRtcGRpciAgICAgICAgICA9IC90bXAKbGMtbWVzc2FnZXMtZGlyID0gL3Vzci9zaGFyZS9teXNxbApza2lwLWV4dGVybmFsLWxvY2tpbmcKc2tpcC1uYW1lLXJlc29sdmU9MQoKYmluZC1hZGRyZXNzICAgICAgICAgICAgPSAqCmtleV9idWZmZXJfc2l6ZSA9IDEyOE0KCm15aXNhbV9zb3J0X2J1ZmZlcl9zaXplID0gNE0KbWF4X2FsbG93ZWRfcGFja2V0ICAgICAgPSA2NE0KbXlpc2FtLXJlY292ZXItb3B0aW9ucyA9IEJBQ0tVUAptYXhfbGVuZ3RoX2Zvcl9zb3J0X2RhdGEgPSA4MTkyCnF1ZXJ5X2NhY2hlX2xpbWl0ICAgICAgID0gNE0KcXVlcnlfY2FjaGVfc2l6ZSAgICAgICAgPSAwCnF1ZXJ5X2NhY2hlX3R5cGUJPSAwCgpleHBpcmVfbG9nc19kYXlzICAgICAgICA9IDEwCm1heF9iaW5sb2dfc2l6ZSAgICAgICAgID0gMTAwTQoKbWF4X2Nvbm5lY3Rpb25zICA9IDIwMDAgI3JlY29tbWVuZGVkIGZvciAxNkdCIHJhbSAKYmFja19sb2cgPSA0MDk2Cm9wZW5fZmlsZXNfbGltaXQgPSAxNjM4NAppbm5vZGJfb3Blbl9maWxlcyA9IDE2Mzg0Cm1heF9jb25uZWN0X2Vycm9ycyA9IDMwNzIKdGFibGVfb3Blbl9jYWNoZSA9IDQwOTYKdGFibGVfZGVmaW5pdGlvbl9jYWNoZSA9IDQwOTYKCgp0bXBfdGFibGVfc2l6ZSA9IDFHCm1heF9oZWFwX3RhYmxlX3NpemUgPSAxRwoKaW5ub2RiX2J1ZmZlcl9wb29sX3NpemUgPSAxMkcgI3JlY29tbWVuZGVkIGZvciAxNkdCIHJhbQppbm5vZGJfYnVmZmVyX3Bvb2xfaW5zdGFuY2VzID0gMQppbm5vZGJfcmVhZF9pb190aHJlYWRzID0gNjQKaW5ub2RiX3dyaXRlX2lvX3RocmVhZHMgPSA2NAppbm5vZGJfdGhyZWFkX2NvbmN1cnJlbmN5ID0gMAppbm5vZGJfZmx1c2hfbG9nX2F0X3RyeF9jb21taXQgPSAwCmlubm9kYl9mbHVzaF9tZXRob2QgPSBPX0RJUkVDVApwZXJmb3JtYW5jZV9zY2hlbWEgPSBPTgppbm5vZGItZmlsZS1wZXItdGFibGUgPSAxCmlubm9kYl9pb19jYXBhY2l0eT0yMDAwMAppbm5vZGJfdGFibGVfbG9ja3MgPSAwCmlubm9kYl9sb2NrX3dhaXRfdGltZW91dCA9IDAKaW5ub2RiX2RlYWRsb2NrX2RldGVjdCA9IDAKaW5ub2RiX2xvZ19maWxlX3NpemUgPSA1MTJNCgpzcWwtbW9kZT0iTk9fRU5HSU5FX1NVQlNUSVRVVElPTiIKCltteXNxbGR1bXBdCnF1aWNrCnF1b3RlLW5hbWVzCm1heF9hbGxvd2VkX3BhY2tldCAgICAgID0gMTZNCgpbbXlzcWxdCgpbaXNhbWNoa10Ka2V5X2J1ZmZlcl9zaXplICAgICAgICAgICAgICA9IDE2TQo=")
+
 
 class col:
     HEADER = '\033[95m'
@@ -24,21 +25,53 @@ class col:
 
 def generate(length=19): return ''.join(random.choice(string.ascii_letters + string.digits) for i in range(length))
 
+
 def getIP():
-    ip = urlopen('http://ip.42.pl/raw').read().decode('utf-8')
-    return ip
+    import socket
+    import requests
+
+    services = [
+        'http://ip.42.pl/raw',
+        'http://ipecho.net/plain',
+        'http://checkip.amazonaws.com/'
+    ]
+    
+    for service in services:
+        try:
+            response = requests.get(service)
+            if response.status_code == 200:
+                return response.text.strip()
+        except requests.RequestException:
+            pass
+    
+    try:
+        # If all services fail, use a fallback method
+        ip = socket.gethostbyname(socket.gethostname())
+        return ip
+    except Exception:
+        return "127.0.0.1"
 
 def getVersion():
     try: return subprocess.check_output("lsb_release -d".split()).split(b":")[-1].strip().decode('utf-8')
     except: return ""
 
 def printc(rText, rColour=col.OKBLUE, rPadding=0):
-    print("%s ┌────────────────────────────────────────────────────┐ %s" % (rColour, col.ENDC))
-    for i in range(rPadding): print("%s │                                                │ %s" % (rColour, col.ENDC))
-    print("%s │ %s%s%s │ %s" % (rColour, " "*(23-(len(rText)//2)), rText, " "*(45-(22-(len(rText)//2))-len(rText)), col.ENDC))
-    for i in range(rPadding): print("%s │                                                │ %s" % (rColour, col.ENDC))
-    print("%s └────────────────────────────────────────────────────┘ %s" % (rColour, col.ENDC))
+    max_length = 52  # Max length of text to fit within the box
+    lines = [rText[i:i+max_length] for i in range(0, len(rText), max_length)]
+
+    print("%s ┌%s┐ %s" % (rColour, "─" * (max_length + 2), col.ENDC))
+    for i in range(rPadding):
+        print("%s │%s│ %s" % (rColour, " " * (max_length + 2), col.ENDC))
+    
+    for line in lines:
+        print("%s │ %s%s │ %s" % (rColour, line, " " * (max_length - len(line)), col.ENDC))
+    
+    for i in range(rPadding):
+        print("%s │%s│ %s" % (rColour, " " * (max_length + 2), col.ENDC))
+    
+    print("%s └%s┐ %s" % (rColour, "─" * (max_length + 2), col.ENDC))
     print(" ")
+
 
 def prepare(rType="MAIN"):
     global rPackages
@@ -137,11 +170,12 @@ def mysql(rUsername, rPassword):
     if rCreate:
         shutil.copy("/etc/mysql/my.cnf", "/etc/mysql/my.cnf.xc")
         rFile = open("/etc/mysql/my.cnf", "w")
-        rFile.write(rMySQLCnf.decode('utf-8'))
+        rFile.write(rMySQLCnf)
         rFile.close()
         os.system("systemctl restart mariadb > /dev/null")
+    #printc("Enter MySQL Root Password:", col.WARNING)
     for i in range(5):
-        rMySQLRoot = ""
+        rMySQLRoot = "" #input("  ")
         print(" ")
         if len(rMySQLRoot) > 0: rExtra = " -p%s" % rMySQLRoot
         else: rExtra = ""
@@ -164,26 +198,46 @@ def mysql(rUsername, rPassword):
         except: printc("Invalid password! Try again", col.FAIL)
     return False
 
+
+
 def encrypt(rHost="127.0.0.1", rUsername="user_iptvpro", rPassword="", rDatabase="xtream_iptvpro", rServerID=1, rPort=7999):
+    import base64
     if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):
         rDecrypt = decrypt()
-        rHost = rDecrypt["host"]
-        rPassword = rDecrypt["db_pass"]
-        rServerID = int(rDecrypt["server_id"])
-        rUsername = rDecrypt["db_user"]
-        rDatabase = rDecrypt["db_name"]
-        rPort = int(rDecrypt["db_port"])
+        if rDecrypt:
+            rHost = rDecrypt["host"]
+            rPassword = rDecrypt["db_pass"]
+            rServerID = int(rDecrypt["server_id"])
+            rUsername = rDecrypt["db_user"]
+            rDatabase = rDecrypt["db_name"]
+            rPort = int(rDecrypt["db_port"])
+        else:
+            printc("Failed to decrypt configuration. Using provided parameters.", col.FAIL)
     printc("Encrypting...")
     try: os.remove("/home/xtreamcodes/iptv_xtream_codes/config")
     except: pass
-    rf = open('/home/xtreamcodes/iptv_xtream_codes/config', 'wb')
-    rf.write((''.join(chr(ord(c)^ord(k)) for c,k in izip('{\"host\":\"%s\",\"db_user\":\"%s\",\"db_pass\":\"%s\",\"db_name\":\"%s\",\"server_id\":\"%d\", \"db_port\":\"%d\"}' % (rHost, rUsername, rPassword, rDatabase, rServerID, rPort), cycle('5709650b0d7806074842c6de575025b1'))).encode('base64')).replace('\n', '').encode('utf-8'))
-    rf.close()
+    data = f'{{"host":"{rHost}","db_user":"{rUsername}","db_pass":"{rPassword}","db_name":"{rDatabase}","server_id":"{rServerID}", "db_port":"{rPort}"}}'
+    encrypted_data = bytearray((ord(c) ^ ord(k)) for c, k in zip(data, cycle('5709650b0d7806074842c6de575025b1')))
+    encrypted_data = base64.b64encode(encrypted_data).decode('utf-8')
+    with open('/home/xtreamcodes/iptv_xtream_codes/config', 'w') as rf:
+        rf.write(encrypted_data)
+
+
 
 def decrypt():
+    import base64
     rConfigPath = "/home/xtreamcodes/iptv_xtream_codes/config"
-    try: return json.loads(''.join(chr(ord(c)^ord(k)) for c,k in izip(open(rConfigPath, 'rb').read().decode("base64"), cycle('5709650b0d7806074842c6de575025b1'))))
-    except: return None
+    try:
+        with open(rConfigPath, 'rb') as f:
+            encrypted_data = f.read()
+        encrypted_data = base64.b64decode(encrypted_data)
+        decrypted_data = ''.join(chr(c ^ ord(k)) for c, k in zip(encrypted_data, cycle('5709650b0d7806074842c6de575025b1')))
+        return json.loads(decrypted_data)
+    except Exception as e:
+        print(f"Error decrypting configuration: {e}")
+        return None
+
+
 
 
 def configure():
@@ -228,15 +282,16 @@ def modifyNginx():
     printc("Modifying Nginx")
     rPath = "/home/xtreamcodes/iptv_xtream_codes/nginx/conf/nginx.conf"
     rPrevData = open(rPath, "r").read()
-    if not "listen 25900;" in rPrevData:
+    if not "listen 25500;" in rPrevData:
         shutil.copy(rPath, "%s.xc" % rPath)
-        rData = "}".join(rPrevData.split("}")[:-1]) + "    server {\n        listen 25900;\n        index index.php index.html index.htm;\n        root /home/xtreamcodes/iptv_xtream_codes/admin/;\n\n        location ~ \.php$ {\n                    limit_req zone=one burst=8;\n            try_files $uri =404;\n                 fastcgi_index index.php;\n         fastcgi_pass php;\n                      include fastcgi_params;\n                       fastcgi_buffering on;\n                 fastcgi_buffers 96 32k;\n                       fastcgi_buffer_size 32k;\n                      fastcgi_max_temp_file_size 0;\n                 fastcgi_keep_conn on;\n                 fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n                 fastcgi_param SCRIPT_NAME $fastcgi_script_name;\n        }\n    }\n}"
+        rData = "}".join(rPrevData.split("}")[:-1]) + "    server {\n        listen 25500;\n        index index.php index.html index.htm;\n        root /home/xtreamcodes/iptv_xtream_codes/admin/;\n\n        location ~ \.php$ {\n                    limit_req zone=one burst=8;\n            try_files $uri =404;\n                 fastcgi_index index.php;\n         fastcgi_pass php;\n                      include fastcgi_params;\n                       fastcgi_buffering on;\n                 fastcgi_buffers 96 32k;\n                       fastcgi_buffer_size 32k;\n                      fastcgi_max_temp_file_size 0;\n                 fastcgi_keep_conn on;\n                 fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n                 fastcgi_param SCRIPT_NAME $fastcgi_script_name;\n        }\n    }\n}"
         rFile = open(rPath, "w")
         rFile.write(rData)
         rFile.close()
 
 if __name__ == "__main__":
-    printc("Xtream UI 22f MOD Ubuntu 20.04 Installer - NeySlim/LoferTech/RonSpeclin", col.OKGREEN, 2)
+    printc("Xtream UI 22f MOD Ubuntu 20.04 Installer", col.OKGREEN, 2)
+    printc("By: NeySlim/LoferTech/RonSpeclin", col.OKGREEN, 2)
 
     print(" ")
     rType = input("  Installation Type [MAIN, LB, ADMIN]: ")
@@ -245,8 +300,7 @@ if __name__ == "__main__":
         if rType.upper() == "LB":
             rHost = input("  Main Server IP Address: ")
             rPassword = input("  MySQL Password: ")
-            try: rServerID = int(input("  Load Balancer Server
-            ID: "))
+            try: rServerID = int(input("  Load Balancer Server ID: "))
             except: rServerID = -1
             print(" ")
         else:
@@ -272,7 +326,7 @@ if __name__ == "__main__":
                 if rType.upper() == "MAIN":
                     printc("Please store your MySQL password!")
                     printc(rPassword)
-                    printc("Admin UI: http://%s:25900" % getIP())
+                    printc("Admin UI: http://%s:25500" % getIP())
                     printc("Admin UI default login is admin/admin")
                 rType = "UPDATE"
                 if os.path.exists("/home/xtreamcodes/iptv_xtream_codes/wwwdir/api.php"):
