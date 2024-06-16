@@ -171,7 +171,7 @@ def mysql(rUsername, rPassword):
     if rCreate:
         shutil.copy("/etc/mysql/my.cnf", "/etc/mysql/my.cnf.xc")
         with open("/etc/mysql/my.cnf", "w") as rFile:
-            rFile.write(rMySQLCnf)
+            rFile.write(rMySQLCnf.decode('utf-8'))  # Decode the bytes to string here
         os.system("systemctl restart mariadb > /dev/null")
     
     for i in range(5):
@@ -217,6 +217,7 @@ def mysql(rUsername, rPassword):
         except Exception as e:
             printc(f"Invalid password! Try again. Error: {e}", col.FAIL)
     return False
+
 
 
 def encrypt(rHost="127.0.0.1", rUsername="user_iptvpro", rPassword="", rDatabase="xtream_iptvpro", rServerID=1, rPort=7999):
